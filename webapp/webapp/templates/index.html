@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PriceMatch AI — Smart Product Search</title>
+    <meta
+      name="description"
+      content="Find similar products instantly using AI-powered image and text matching across thousands of listings."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+      <div class="nav-inner">
+        <a href="/" class="nav-brand">
+          <div class="brand-icon">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+          </div>
+          <span class="brand-text"
+            >PriceMatch<span class="brand-accent">AI</span></span
+          >
+        </a>
+        <div class="nav-links">
+          <a href="#how-it-works" class="nav-link">How it Works</a>
+          <a href="#" class="nav-link">Models</a>
+          <a href="#" class="nav-link">About</a>
+          <button
+            class="nav-cta"
+            onclick="document.getElementById('text-input').focus()"
+          >
+            Start Searching
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <!-- Hero -->
+      <section class="hero">
+        <div class="hero-content">
+          <div class="hero-badge">AI-Powered Product Matching</div>
+          <h1 class="hero-title">
+            Find <em>matching</em> products<br />
+            across thousands of<br />
+            <strong>seller listings.</strong>
+          </h1>
+          <p class="hero-subtitle">
+            Upload a product image, type a description, or combine both for
+            precise multimodal search powered by EfficientNet &amp; BERT.
+          </p>
+        </div>
+        <div class="hero-divider"></div>
+      </section>
+
+      <!-- Search -->
+      <section class="search-section">
+        <div class="search-card" id="search-card">
+          <!-- Mode Tabs -->
+          <div class="search-tabs">
+            <button class="tab active" data-mode="combined" id="tab-combined">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+              </svg>
+              Combined
+            </button>
+            <button class="tab" data-mode="image" id="tab-image">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+              Image
+            </button>
+            <button class="tab" data-mode="text" id="tab-text">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M4 7V4h16v3" />
+                <path d="M9 20h6" />
+                <path d="M12 4v16" />
+              </svg>
+              Text
+            </button>
+            <div class="tab-indicator" id="tab-indicator"></div>
+          </div>
+
+          <!-- Image Upload -->
+          <div class="upload-zone" id="dropzone">
+            <input type="file" id="image-upload" accept="image/*" />
+            <div class="upload-content" id="upload-placeholder">
+              <div class="upload-icon">
+                <svg
+                  width="28"
+                  height="28"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+              </div>
+              <span class="upload-label"
+                >Drop an image here or click to browse</span
+              >
+              <span class="upload-hint">PNG, JPG up to 10MB</span>
+            </div>
+            <div class="preview-wrap hidden" id="preview-wrap">
+              <img id="image-preview" alt="Preview" />
+              <button
+                class="preview-remove"
+                id="clear-image"
+                title="Remove image"
+              >
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Text Input -->
+          <div class="text-input-wrap" id="text-input-wrap">
+            <svg
+              class="input-icon"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              id="text-input"
+              placeholder="Describe the product you're looking for..."
+              autocomplete="off"
+            />
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="btn-row">
+            <button class="search-btn" id="btn-search">
+              <span class="btn-content">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                Search Products
+              </span>
+              <span class="btn-loader hidden" id="btn-loader">
+                <span class="spinner"></span>
+                Searching...
+              </span>
+            </button>
+            <button class="btn-secondary" id="btn-clear" type="button">
+              Clear
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- How It Works -->
+      <section class="how-section" id="how-it-works">
+        <h2 class="how-title">How it works</h2>
+        <div class="how-grid">
+          <div class="how-item">
+            <div class="how-num">1</div>
+            <div class="how-item-title">Upload or Describe</div>
+            <p class="how-item-desc">
+              Provide a product image, a text description, or both for the most
+              accurate matching.
+            </p>
+          </div>
+          <div class="how-item">
+            <div class="how-num">2</div>
+            <div class="how-item-title">AI Embedding</div>
+            <p class="how-item-desc">
+              Our ensemble of EfficientNet and BERT models extracts deep
+              features from your query.
+            </p>
+          </div>
+          <div class="how-item">
+            <div class="how-num">3</div>
+            <div class="how-item-title">Instant Matching</div>
+            <p class="how-item-desc">
+              FAISS searches 34,000+ listings in milliseconds and returns the
+              closest matches.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Results -->
+      <section class="results-section hidden" id="results-section">
+        <div class="results-header">
+          <h2 class="results-title" id="results-title">Results</h2>
+          <span class="results-count" id="results-count"></span>
+        </div>
+        <div class="results-grid" id="results-grid"></div>
+      </section>
+
+      <!-- Empty State -->
+      <section class="empty-state hidden" id="empty-state">
+        <div class="empty-icon">
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            <line x1="8" y1="11" x2="14" y2="11" />
+          </svg>
+        </div>
+        <p class="empty-text">No matching products found</p>
+        <p class="empty-hint">
+          Try adjusting your search or uploading a different image
+        </p>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <span>&copy; 2026 PriceMatch AI</span>
+        <span class="footer-sep">&middot;</span>
+        <span>EfficientNet + BERT Ensemble</span>
+      </div>
+    </footer>
+
+    <script>
+      (function () {
+        const $ = (id) => document.getElementById(id);
+
+        const imageUpload = $("image-upload");
+        const preview = $("image-preview");
+        const previewWrap = $("preview-wrap");
+        const placeholder = $("upload-placeholder");
+        const clearBtn = $("clear-image");
+        const dropzone = $("dropzone");
+        const textInput = $("text-input");
+        const textWrap = $("text-input-wrap");
+        const searchBtn = $("btn-search");
+        const btnContent = searchBtn.querySelector(".btn-content");
+        const btnLoader = $("btn-loader");
+        const btnClear = $("btn-clear");
+        const resultsSection = $("results-section");
+        const resultsGrid = $("results-grid");
+        const resultsTitle = $("results-title");
+        const resultsCount = $("results-count");
+        const emptyState = $("empty-state");
+        const navbar = $("navbar");
+        const tabIndicator = $("tab-indicator");
+
+        let currentMode = "combined";
+
+        // ─── Scroll ───
+        window.addEventListener("scroll", () => {
+          navbar.classList.toggle("scrolled", window.scrollY > 20);
+        });
+
+        // ─── Tabs ───
+        function positionIndicator(tab) {
+          tabIndicator.style.width = tab.offsetWidth + "px";
+          tabIndicator.style.left = tab.offsetLeft + "px";
+        }
+
+        document.querySelectorAll(".tab").forEach((tab) => {
+          tab.addEventListener("click", () => {
+            document
+              .querySelectorAll(".tab")
+              .forEach((t) => t.classList.remove("active"));
+            tab.classList.add("active");
+            currentMode = tab.dataset.mode;
+            positionIndicator(tab);
+
+            if (currentMode === "text") {
+              dropzone.classList.add("collapsed");
+              textWrap.classList.remove("collapsed");
+            } else if (currentMode === "image") {
+              dropzone.classList.remove("collapsed");
+              textWrap.classList.add("collapsed");
+            } else {
+              dropzone.classList.remove("collapsed");
+              textWrap.classList.remove("collapsed");
+            }
+          });
+        });
+
+        requestAnimationFrame(() =>
+          positionIndicator(document.querySelector(".tab.active")),
+        );
+
+        // ─── Image ───
+        imageUpload.addEventListener("change", (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            preview.src = ev.target.result;
+            previewWrap.classList.remove("hidden");
+            placeholder.classList.add("hidden");
+          };
+          reader.readAsDataURL(file);
+        });
+
+        clearBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          imageUpload.value = "";
+          preview.src = "";
+          previewWrap.classList.add("hidden");
+          placeholder.classList.remove("hidden");
+        });
+
+        // Drag & Drop
+        ["dragenter", "dragover"].forEach((evt) =>
+          dropzone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            dropzone.classList.add("drag-over");
+          }),
+        );
+        ["dragleave", "drop"].forEach((evt) =>
+          dropzone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            dropzone.classList.remove("drag-over");
+          }),
+        );
+        dropzone.addEventListener("drop", (e) => {
+          const file = e.dataTransfer.files[0];
+          if (file && file.type.startsWith("image/")) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            imageUpload.files = dt.files;
+            imageUpload.dispatchEvent(new Event("change"));
+          }
+        });
+
+        // ─── Clear All ───
+        btnClear.addEventListener("click", () => {
+          textInput.value = "";
+          imageUpload.value = "";
+          preview.src = "";
+          previewWrap.classList.add("hidden");
+          placeholder.classList.remove("hidden");
+          resultsSection.classList.add("hidden");
+          emptyState.classList.add("hidden");
+        });
+
+        // ─── Search ───
+        searchBtn.addEventListener("click", doSearch);
+        textInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") doSearch();
+        });
+
+        async function doSearch() {
+          const text = textInput.value.trim();
+          const hasImage = imageUpload.files[0];
+
+          if (!text && !hasImage) {
+            searchBtn.classList.add("shake");
+            setTimeout(() => searchBtn.classList.remove("shake"), 500);
+            return;
+          }
+
+          btnContent.classList.add("hidden");
+          btnLoader.classList.remove("hidden");
+          searchBtn.disabled = true;
+          resultsSection.classList.add("hidden");
+          emptyState.classList.add("hidden");
+
+          try {
+            const fd = new FormData();
+            if (hasImage) fd.append("image", imageUpload.files[0]);
+            if (text) fd.append("text", text);
+
+            const resp = await fetch("/api/search", {
+              method: "POST",
+              body: fd,
+            });
+            const data = await resp.json();
+
+            if (data.results && data.results.length > 0) {
+              renderResults(data.results);
+            } else {
+              emptyState.classList.remove("hidden");
+            }
+          } catch (err) {
+            console.error(err);
+            emptyState.classList.remove("hidden");
+          } finally {
+            btnContent.classList.remove("hidden");
+            btnLoader.classList.add("hidden");
+            searchBtn.disabled = false;
+          }
+        }
+
+        function renderResults(results) {
+          resultsGrid.innerHTML = "";
+
+          const parts = [];
+          if (textInput.value.trim()) parts.push(`"${textInput.value.trim()}"`);
+          if (imageUpload.files[0]) parts.push("uploaded image");
+          resultsTitle.textContent = `Results for ${parts.join(" + ")}`;
+          resultsCount.textContent = `${results.length} matches`;
+
+          results.forEach((item, i) => {
+            const score = Math.round(item.score * 100);
+            let sc = "score-low";
+            if (score >= 85) sc = "score-high";
+            else if (score >= 60) sc = "score-mid";
+
+            const card = document.createElement("div");
+            card.className = "product-card";
+            card.style.animationDelay = `${i * 0.04}s`;
+            card.innerHTML = `
+                    <div class="card-img-wrap">
+                        <img src="/product_images/${item.image}" alt="${item.title}" loading="lazy"
+                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23f4f0e8%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%239ca89c%22 font-size=%2210%22>No Image</text></svg>'">
+                        <div class="card-score ${sc}">${score}%</div>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title" title="${item.title}">${item.title}</h3>
+                        <div class="card-footer">
+                            <span class="card-price">${item.price || "—"}</span>
+                            <span class="card-id">#${item.posting_id ? String(item.posting_id).slice(0, 8) : "—"}</span>
+                        </div>
+                    </div>
+                `;
+            resultsGrid.appendChild(card);
+          });
+
+          resultsSection.classList.remove("hidden");
+          resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      })();
+    </script>
+  </body>
+</html>
