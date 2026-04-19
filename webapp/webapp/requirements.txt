@@ -11,3 +11,4 @@ numpy
 albumentations
 pillow
 faiss-cpu
+lightgbm
