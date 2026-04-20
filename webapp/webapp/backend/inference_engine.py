@@ -36,10 +36,6 @@ except ImportError:
     lgb = None
 
 
-# =============================================================================
-# MODEL DEFINITIONS — Exact match to kaggler's lyakaap solution
-# =============================================================================
-
 def gem(x, p=3, eps=1e-6):
     return F.avg_pool2d(x.clamp(min=eps).pow(p), (x.size(-2), x.size(-1))).pow(1./p)
 
@@ -168,7 +164,7 @@ class BertNet(nn.Module):
 
 
 # =============================================================================
-# SEARCH ENGINE — Lazy loading + FAISS retrieval + LightGBM re-ranking
+# SEARCH ENGINE - Lazy loading + FAISS retrieval + LightGBM re-ranking
 # =============================================================================
 
 class SearchEngine:
@@ -188,19 +184,19 @@ class SearchEngine:
             print(f"Warning: train.csv not found at {self.train_csv_path}")
             self.df = pd.DataFrame()
 
-        # Models — lazy loaded
+        # Models - lazy loaded
         self.image_models = {}
         self.bert_models = {}
         self.model_params = {}
         self.transforms = None
         self._models_loaded = False
 
-        # Embeddings — stored separately for correct modality-specific search
+        # Embeddings - stored separately for correct modality-specific search
         self.img_feats = None
         self.bert_feats = None
         self.combined_feats = None
 
-        # FAISS indices — one per modality
+        # FAISS indices - one per modality
         self.img_index = None
         self.bert_index = None
         self.combined_index = None
@@ -244,15 +240,15 @@ class SearchEngine:
         self._load_image_model('deit_small.pth', 'deit_small')
         self._load_image_model('efficientnet_b3.pth', 'efficientnet_b3')
 
-        # BERT Indonesian — simple_mean=True
+        # BERT Indonesian - simple_mean=True
         self._load_bert_model('bert_indonesian.pth', 'bert_indonesian', 'bert-indonesian',
                               simple_mean=True)
 
-        # BERT Multilingual — simple_mean=False, uses bert_indonesian's fc_dim/max_len
+        # BERT Multilingual - simple_mean=False, uses bert_indonesian's fc_dim/max_len
         self._load_bert_model('bert_multilingual.pth', 'bert_multilingual', 'bert-multilingual',
                               simple_mean=False, override_params_from='bert_indonesian')
 
-        # XLM-RoBERTa — simple_mean=False, uses its own params
+        # XLM-RoBERTa - simple_mean=False, uses its own params
         self._load_bert_model('xlm_roberta.pth', 'xlm_roberta', 'xlm-roberta', simple_mean=False)
 
         print(f"Loaded image models: {list(self.image_models.keys())}")
@@ -383,7 +379,7 @@ class SearchEngine:
                 print(f"  Cache error: {e}. Recomputing...")
 
         if not loaded:
-            # Models ARE needed — load them now for embedding computation
+            # Models ARE needed - load them now for embedding computation
             print("No valid embedding cache found. Loading models for computation...")
             self._compute_all_embeddings()
             if self.img_feats is not None:
@@ -455,7 +451,7 @@ class SearchEngine:
                 if 'xlm_roberta' in self.bert_models:
                     all_bf3.append(self.bert_models['xlm_roberta'].extract_feat(titles).cpu().numpy())
 
-        # Concatenate and normalize — exactly matching kaggler's pipeline
+        # Concatenate and normalize - exactly matching kaggler's pipeline
         # Image: normalize each model separately, concat, re-normalize
         if all_f1 and all_f2:
             f1 = np.concatenate(all_f1)
@@ -652,7 +648,7 @@ class SearchEngine:
         img_scores = c_img @ q_img                   # (n,) image-only cosine sim
         text_scores = c_txt @ q_txt                  # (n,) text-only cosine sim
 
-        # Cross-modal interaction features (dimension-safe — derived from scores)
+        # Cross-modal interaction features (dimension-safe - derived from scores)
         # Product captures joint agreement: high only when BOTH modalities agree
         score_product = img_scores * text_scores
         # Harmonic mean: balanced fusion that penalizes large discrepancies
@@ -691,7 +687,7 @@ class SearchEngine:
             query_idx, candidate_indices, candidate_scores
         )
 
-        # LightGBM prediction — higher = more relevant
+        # LightGBM prediction - higher = more relevant
         lgbm_scores = self.lgbm_ranker.predict(features)
 
         # Normalize LightGBM margin scores to [0, 1] via sigmoid
